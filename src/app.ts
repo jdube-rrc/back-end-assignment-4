@@ -37,7 +37,7 @@ app.get("/api/v1/health", (req: express.Request, res: express.Response) => {
     res.json(healthData);
 });
 
-app.use("api/v1/loans", loanRoutes);
+app.use("/api/v1/loans", loanRoutes);
 
 app.use(errorHandler);
 
