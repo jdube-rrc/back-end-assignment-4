@@ -28,7 +28,7 @@ const authenticate = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const authHeader = req.headers.authorization;
+        const authHeader: string | undefined = req.headers.authorization;
         const token: string | undefined = authHeader?.startsWith("Bearer ")
             ? authHeader.split(" ")[1]
             : undefined;
