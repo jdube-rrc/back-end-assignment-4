@@ -78,3 +78,25 @@ export const approveLoanApplication = (req: Request, res: Response): void => {
     )
   );
 };
+
+/**
+ * GET /api/v1/loans/:id
+ * Retrieve a single loan application by id
+ * Role: officer, manager
+ */
+export const getLoanApplicationById = (req: Request, res: Response): void => {
+  const { id } = req.params;
+
+  // For demo purposes return a static/fake loan matching the id param.
+  res.status(HTTP_STATUS.OK).json(
+    successResponse(
+      {
+        id,
+        amount: 50000,
+        dateCreated: '2025-10-01',
+        status: 'pending',
+      },
+      'Loan application retrieved successfully'
+    )
+  );
+};
