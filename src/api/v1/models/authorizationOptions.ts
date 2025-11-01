@@ -1,4 +1,5 @@
 export interface AuthorizationOptions {
-    hasRole: Array<"admin" | "manager" | "user">;
+    // include 'officer' role used by loan routes
+    hasRole: Array<"admin" | "manager" | "user" | "officer">;
     allowSameUser?: boolean;
 }
