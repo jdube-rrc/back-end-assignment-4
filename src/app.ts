@@ -1,6 +1,8 @@
 import express, { Express } from "express";
 import morgan from "morgan";
 import loanRoutes from "./api/v1/routes/loanRoutes";
+import adminRoutes from "./api/v1/routes/adminRoutes";
+import userRoutes from "./api/v1/routes/userRoutes";
 import { 
     accessLogger, 
     errorLogger, 
@@ -38,6 +40,8 @@ app.get("/api/v1/health", (req: express.Request, res: express.Response) => {
 });
 
 app.use("/api/v1/loans", loanRoutes);
+app.use("/api/v1/admin", adminRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.use(errorHandler);
 
