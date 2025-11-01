@@ -7,6 +7,8 @@ module.exports = {
   transform: {
     '^.+\\.tsx?$': 'ts-jest',
   },
+  // run shared setup after the test framework is installed
+  setupFilesAfterEnv: ['<rootDir>/test/jest.setup.ts'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
