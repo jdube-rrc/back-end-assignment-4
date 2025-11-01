@@ -21,7 +21,7 @@ import { AuthorizationError } from "../errors/errors";
 const isAuthorized = (opts: AuthorizationOptions): MiddlewareFunction => {
     return (req: Request, res: Response, next: NextFunction) => {
         try {
-            const { role, uid } = res.locals;
+            const { role: rawRole, uid } = res.locals;
             const { id } = req.params;
 
             // Allow if the same user is accessing their own data
@@ -29,18 +29,39 @@ const isAuthorized = (opts: AuthorizationOptions): MiddlewareFunction => {
                 return next();
             }
 
+            // Normalize role(s) from various possible claim shapes
+            const normalizeRoles = (r: unknown): string[] => {
+                if (!r) return [];
+                // string: "manager"
+                if (typeof r === 'string') return [r.toLowerCase()];
+                // array: ["manager"]
+                if (Array.isArray(r)) return r.map(String).map(s => s.toLowerCase());
+                // object: { role: 'manager' } or { roles: ['manager'] }
+                if (typeof r === 'object') {
+                    // @ts-ignore
+                    const asAny = r as Record<string, any>;
+                    if (asAny.role && typeof asAny.role === 'string') return [asAny.role.toLowerCase()];
+                    if (asAny.roles && Array.isArray(asAny.roles)) return asAny.roles.map(String).map(s => s.toLowerCase());
+                }
+                return [];
+            };
+
+            const userRoles = normalizeRoles(rawRole);
+
             // If no role exists on the user, throw Forbidden response
-            if (!role) {
+            if (!userRoles || userRoles.length === 0) {
                 throw new AuthorizationError(
                     "Forbidden: No role found",
                     "ROLE_NOT_FOUND"
                 );
             }
 
-            // Check if the user's role matches one of the allowed roles
-            if (opts.hasRole.includes(role)) {
-                return next();
-            }
+            // Prepare allowed roles lowercased
+            const allowed = opts.hasRole.map(r => r.toLowerCase());
+
+            // Check for intersection between userRoles and allowed
+            const intersects = userRoles.some(r => allowed.includes(r));
+            if (intersects) return next();
 
             // If the role is not authorized, throw Forbidden response
             throw new AuthorizationError(
