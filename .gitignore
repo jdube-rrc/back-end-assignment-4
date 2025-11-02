@@ -1,2 +1,8 @@
 node_modules/
 dist/
+
+# Logs
+logs/
+*.log
+
+module-4-assignment-910ca-firebase-adminsdk-fbsvc-301bfac9f9.json
