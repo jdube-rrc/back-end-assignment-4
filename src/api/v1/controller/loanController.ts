@@ -86,8 +86,6 @@ export const approveLoanApplication = (req: Request, res: Response): void => {
  */
 export const getLoanApplicationById = (req: Request, res: Response): void => {
   const { id } = req.params;
-
-  // For demo purposes return a static/fake loan matching the id param.
   res.status(HTTP_STATUS.OK).json(
     successResponse(
       {
@@ -97,6 +95,20 @@ export const getLoanApplicationById = (req: Request, res: Response): void => {
         status: 'pending',
       },
       'Loan application retrieved successfully'
+    )
+  );
+};
+
+
+export const deleteLoanApplication = (req: Request, res: Response): void => {
+  const { id } = req.params;
+  res.status(HTTP_STATUS.OK).json(
+    successResponse(
+      {
+        id,
+        message: 'Loan application deleted successfully',
+      },
+      'Loan application deleted successfully'
     )
   );
 };

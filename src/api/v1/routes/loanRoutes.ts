@@ -40,4 +40,11 @@ router.put("/:id/review", authenticate, authorize({ hasRole: ["officer"] }), loa
  */
 router.put("/:id/approve", authenticate, authorize({ hasRole: ["manager"] }), loanController.approveLoanApplication);
 
+/**
+ * DELETE /api/v1/loans/:id
+ * Delete a loan application (RESTful)
+ * Required role: manager
+ */
+router.delete("/:id", authenticate, authorize({ hasRole: ["manager"] }), loanController.deleteLoanApplication);
+
 export default router;
