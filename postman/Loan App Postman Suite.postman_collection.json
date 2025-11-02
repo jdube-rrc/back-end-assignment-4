@@ -1,0 +1,520 @@
+{
+	"info": {
+		"_postman_id": "958e8852-adcf-4be3-be78-59c436c055a7",
+		"name": "Loan App Postman Suite",
+		"description": "Automated Postman test suite for the Loan App.\nSet environment variables before running: baseUrl, userToken, officerToken, managerToken, adminToken, invalidToken, targetUid",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "48828292",
+		"_collection_link": "https://dubejared-8800599.postman.co/workspace/Jared's-Workspace~af789f6e-3918-4302-84e7-308e1de59e09/collection/48828292-958e8852-adcf-4be3-be78-59c436c055a7?action=share&source=collection_link&creator=48828292"
+	},
+	"item": [
+		{
+			"name": "Auth - Success (GET /users/:id)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Response has success status and data\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('status', 'success');",
+							"    pm.expect(json).to.have.property('data');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					}
+				],
+				"url": "{{baseUrl}}/users/{{targetUid}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Auth - Missing Token (GET /users/:id)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 401\", function () { pm.response.to.have.status(401); });",
+							"pm.test(\"Body uses standardized errorResponse shape\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('success', false);",
+							"    pm.expect(json).to.have.property('error');",
+							"    pm.expect(json.error).to.have.property('code', 'TOKEN_NOT_FOUND');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{baseUrl}}/users/{{targetUid}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Auth - Invalid Token (GET /users/:id)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 401\", function () { pm.response.to.have.status(401); });",
+							"pm.test(\"Error response shape present\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('success', false);",
+							"    pm.expect(json).to.have.property('error');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{invalidToken}}",
+						"type": "text"
+					}
+				],
+				"url": "{{baseUrl}}/users/{{targetUid}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Authz - Admin Success (POST /admin/set-claims)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Success response returned\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('status', 'success');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{managerToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"uid\": \"{{targetUid}}\", \"claims\": { \"role\": \"user\" } }"
+				},
+				"url": "{{baseUrl}}/admin/set-claims"
+			},
+			"response": []
+		},
+		{
+			"name": "Authz - Insufficient Role (POST /admin/set-claims)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 403\", function () { pm.response.to.have.status(403); });",
+							"pm.test(\"Standardized error shape and code\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('success', false);",
+							"    pm.expect(json).to.have.property('error');",
+							"    pm.expect(json.error).to.have.property('code', 'INSUFFICIENT_ROLE');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"uid\": \"{{targetUid}}\", \"claims\": { \"role\": \"user\" } }"
+				},
+				"url": "{{baseUrl}}/admin/set-claims"
+			},
+			"response": []
+		},
+		{
+			"name": "Loans - Create (POST /loans)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 201\", function () { pm.response.to.have.status(201); });",
+							"pm.test(\"Response has created loan with pending status\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('status', 'success');",
+							"    pm.expect(json).to.have.nested.property('data.status', 'pending');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{userToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"amount\": 120000 }"
+				},
+				"url": "{{baseUrl}}/loans"
+			},
+			"response": []
+		},
+		{
+			"name": "Loans - Get All (GET /loans)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Returns an array of loans\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('status', 'success');",
+							"    pm.expect(json.data).to.be.an('array');",
+							"    pm.expect(json.data.length).to.be.above(0);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{officerToken}}",
+						"type": "text"
+					}
+				],
+				"url": "{{baseUrl}}/loans"
+			},
+			"response": []
+		},
+		{
+			"name": "Loans - Get By Id (GET /loans/:id)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Response has success status and loan data\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('status', 'success');",
+							"    pm.expect(json).to.have.property('data');",
+							"    pm.expect(json.data).to.have.property('id', '1');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{officerToken}}",
+						"type": "text"
+					}
+				],
+				"url": "{{baseUrl}}/loans/1"
+			},
+			"response": []
+		},
+		{
+			"name": "Loans - Review (PUT /loans/:id/review)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Loan status is reviewed\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('status', 'success');",
+							"    pm.expect(json).to.have.nested.property('data.status', 'reviewed');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{officerToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": "{{baseUrl}}/loans/1/review"
+			},
+			"response": []
+		},
+		{
+			"name": "Loans - Approve (PUT /loans/:id/approve)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Loan status is approved\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('status', 'success');",
+							"    pm.expect(json).to.have.nested.property('data.status', 'approved');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{managerToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": "{{baseUrl}}/loans/1/approve"
+			},
+			"response": []
+		},
+		{
+			"name": "Loans - Delete (DELETE /loans/:id)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 204 No Content\", function () { pm.response.to.have.status(204); });"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{managerToken}}",
+						"type": "text"
+					}
+				],
+				"url": "{{baseUrl}}/loans/1"
+			},
+			"response": []
+		},
+		{
+			"name": "Admin - Set Claims - Missing Body -> 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 400\", function () { pm.response.to.have.status(400); });",
+							"pm.test(\"Returns descriptive message\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('message', 'uid and claims are required');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{managerToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": "{{baseUrl}}/admin/set-claims"
+			},
+			"response": []
+		},
+		{
+			"name": "Auth - signInWithPassword (Get ID Token)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status is 200\", function () { pm.response.to.have.status(200); });",
+							"pm.test(\"Contains idToken and refreshToken\", function () {",
+							"    var json = pm.response.json();",
+							"    pm.expect(json).to.have.property('idToken');",
+							"    pm.expect(json).to.have.property('refreshToken');",
+							"    // Save tokens into the environment for subsequent requests",
+							"    pm.environment.set('userToken', json.idToken);",
+							"    pm.environment.set('refreshToken', json.refreshToken);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"email\": \"{{testUserEmail}}\", \"password\": \"{{testUserPassword}}\", \"returnSecureToken\": true }"
+				},
+				"url": {
+					"raw": "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={{apiKey}}",
+					"protocol": "https",
+					"host": [
+						"identitytoolkit",
+						"googleapis",
+						"com"
+					],
+					"path": [
+						"v1",
+						"accounts:signInWithPassword"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{apiKey}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1"
+		},
+		{
+			"key": "userToken",
+			"value": ""
+		},
+		{
+			"key": "officerToken",
+			"value": ""
+		},
+		{
+			"key": "managerToken",
+			"value": ""
+		},
+		{
+			"key": "adminToken",
+			"value": ""
+		},
+		{
+			"key": "invalidToken",
+			"value": "invalid.token.here"
+		},
+		{
+			"key": "targetUid",
+			"value": "test-uid-1"
+		},
+		{
+			"key": "apiKey",
+			"value": ""
+		},
+		{
+			"key": "testUserEmail",
+			"value": ""
+		},
+		{
+			"key": "testUserPassword",
+			"value": ""
+		}
+	]
+}
